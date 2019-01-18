@@ -1,0 +1,6 @@
+[submodule "ncas-sonic-4-software"]
+	path = ncas-sonic-4-software
+	url = git@github.com:ncasuk/ncas-sonic-4-software.git
+[submodule "amfutils"]
+	path = amfutils
+	url = git@github.com:ncasuk/amfutils
