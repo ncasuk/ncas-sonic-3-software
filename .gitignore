@@ -1,10 +1,14 @@
 # For projects using Nanoc (http://nanoc.ws/)
 
 # Default location for output (needs to match output_dir's value found in nanoc.yaml)
-output/
+output/A
+netcdf/
 
 # Temporary file directory
 tmp/nanoc/
 
 # Crash Log
 crash.log
+
+#VIM swapfiles
+*.swp
