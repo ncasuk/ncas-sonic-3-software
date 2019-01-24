@@ -1,4 +1,5 @@
 import csv
+import os
 
 import pandas as pd
 
@@ -53,6 +54,16 @@ class IAOSonic(GillWindSonic):
 
         return sonic
 
-df = IAOSonic('iao-sonic-metadata')
-df.sonic_netcdf(df.get_sonic_data(['20171205_sonic.csv']))
 
+if __name__ == '__main__':
+    args = IAOSonic.arguments().parse_args()
+    sn = IAOSonic(args.metadata)
+   
+    try:
+        os.makedirs(args.outdir,mode=0o755)
+    except OSError:
+         #Dir already exists, probably
+         pass
+    else:
+        print ("Successfully create directory %s" % args.outdir)
+    sn.sonic_netcdf(sn.get_sonic_data(args.infiles), args.outdir, args.metadata)
