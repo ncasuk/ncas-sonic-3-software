@@ -10,10 +10,9 @@ class IAOSonic(GillWindSonic):
     IAO to NetCDF
     """
 
-    vaisalafields = ['Timestamp','Dn','Dm','Dx','Sn','Sm','Sx','Ta','Tp','Ua','Pa','Rc','Rd','Ri','Hc','Hd','Hi','Rp','Hp','Th','Vh','Vs','Vr','Id']
+    progname = __file__
 
-    def __init__(self):
-        pass;
+    vaisalafields = ['Timestamp','Dn','Dm','Dx','Sn','Sm','Sx','Ta','Tp','Ua','Pa','Rc','Rd','Ri','Hc','Hd','Hi','Rp','Hp','Th','Vh','Vs','Vr','Id']
 
     def get_sonic_data(self, infiles):
         """
@@ -32,18 +31,28 @@ class IAOSonic(GillWindSonic):
             with open(infile, 'rt') as f:
                 indata = csv.reader(f)
                 for line in indata:
-                    out = {'Timestamp': line[0]}
-                    #discard line[1], it's just a start-of-data indicator
-                    for datum in line[2:]:
-                        details = datum.split('=')
-                        #values are suffixed with a single character unit, ignore it
-                        out[details[0]] = details[1][:-1]
-                        if details[0] == 'Id':
-                            out[details[0]] = details[1]
-                    data.append(out)
+                    if line[1] == '0R0': #code for automatic data
+                        out = {'Timestamp': line[0]}
+                        #discard line[1], it's just a start-of-data indicator
+                        for datum in line[2:]:
+                            details = datum.split('=')
+                            #values are suffixed with a single character unit, ignore it
+                            out[details[0]] = details[1][:-1]
+                            if details[0] == 'Id':
+                                out[details[0]] = details[1]
+                        data.append(out)
         sonic = pd.DataFrame(data)
-        print(sonic)
+        sonic['Timestamp'] = pd.DatetimeIndex(sonic['Timestamp'].values)
+        sonic.set_index('Timestamp', inplace=True) 
+        sonic['r'] = sonic.Sm # wind speed
+        sonic['theta'] = sonic.Dm # Wind dir
 
+        #set start and end times
+        self.time_coverage_start = sonic.index[0].strftime(self.timeformat)
+        self.time_coverage_end = sonic.index[-1].strftime(self.timeformat)
 
-df = IAOSonic()
-df.get_sonic_data(['20181003_sonic.csv'])
+        return sonic
+
+df = IAOSonic('iao-sonic-metadata')
+df.sonic_netcdf(df.get_sonic_data(['20171205_sonic.csv']))
+
